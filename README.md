@@ -20,6 +20,17 @@ npm start
 
 The server listens on port `3000` by default. Set `PORT` to use another port.
 
+## Run checkout tests
+
+Copy the example environment file and run the Mocha suite:
+
+```bash
+cp .env.example .env
+npm test
+```
+
+The checkout cases are data-driven from `test/data/checkout-cases.json`; shared login and cart cleanup helpers are in `test/helpers/auth.js`. Mochawesome writes an HTML report to `reports/mochawesome/checkout-ep-report.html`.
+
 ## Test data
 
 Three products are loaded at startup:

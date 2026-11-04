@@ -1,0 +1,30 @@
+{
+  "cash": {
+    "description": "cash payment applies a 10% discount",
+    "productId": "prod-002",
+    "quantity": 1,
+    "paymentMethod": "cash",
+    "expectedStatus": 201,
+    "expectedSubtotal": 18.99,
+    "expectedDiscount": 1.9,
+    "expectedTotal": 17.09
+  },
+  "credit_card": {
+    "description": "credit card payment has no discount",
+    "productId": "prod-003",
+    "quantity": 1,
+    "paymentMethod": "credit_card",
+    "expectedStatus": 201,
+    "expectedSubtotal": 24.99,
+    "expectedDiscount": 0,
+    "expectedTotal": 24.99
+  },
+  "unsupported": {
+    "description": "unsupported payment method is rejected",
+    "productId": "prod-003",
+    "quantity": 1,
+    "paymentMethod": "bitcoin",
+    "expectedStatus": 400,
+    "expectedError": "paymentMethod must be cash or credit_card."
+  }
+}
