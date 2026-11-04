@@ -1,0 +1,17 @@
+{
+  "name": "automationstar-checkout-api",
+  "version": "1.0.0",
+  "description": "In-memory e-commerce checkout REST API built with Express",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
+  }
+}
