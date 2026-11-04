@@ -51,6 +51,7 @@ Three users are loaded at startup. Use these credentials to log in:
 
 | URL | Purpose |
 | --- | --- |
+| `http://localhost:3000/` | Redirects to Swagger UI |
 | `http://localhost:3000/api/register` | Register a user (`POST`) |
 | `http://localhost:3000/api/login` | Log in (`POST`) |
 | `http://localhost:3000/api/cart` | View or add cart items (`GET`, `POST`) |

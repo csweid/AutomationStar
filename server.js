@@ -190,6 +190,10 @@ app.get('/openapi.yaml', (req, res) => {
   return res.type('application/yaml').sendFile(openApiPath);
 });
 
+app.get('/', (req, res) => {
+  return res.redirect('/docs');
+});
+
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(openApiDocument));
 
 app.use((err, req, res, next) => {
