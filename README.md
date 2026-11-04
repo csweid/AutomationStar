@@ -59,6 +59,7 @@ Three users are loaded at startup. Use these credentials to log in:
 | `http://localhost:3000/api/checkout` | Place an order (`POST`) |
 | `http://localhost:3000/docs` | Interactive Swagger UI |
 | `http://localhost:3000/openapi.yaml` | Raw OpenAPI YAML specification |
+| `http://localhost:3000/reports/discount-ep-report.html` | Equivalence-partitioning test report |
 
 Cart and checkout requests require the bearer token returned by login. For example, send `Authorization: Bearer <token>`.
 
