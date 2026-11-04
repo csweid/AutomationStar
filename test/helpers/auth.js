@@ -3,11 +3,11 @@
 const path = require('node:path');
 const dotenv = require('dotenv');
 const request = require('supertest');
-const app = require('../../server');
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-const api = request(app);
+const app = require('../../server');
+const api = process.env.API_BASE_URL ? request(process.env.API_BASE_URL) : request(app);
 
 async function login() {
   const { TEST_USER_EMAIL: email, TEST_USER_PASSWORD: password } = process.env;

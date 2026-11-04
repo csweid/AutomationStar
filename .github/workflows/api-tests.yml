@@ -1,0 +1,78 @@
+name: API Test Automation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions:
+  contents: read
+
+jobs:
+  checkout-api-tests:
+    name: Checkout API tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Configure test environment
+        run: cp .env.example .env
+
+      - name: Start API, wait for readiness, and run tests
+        run: |
+          set -euo pipefail
+
+          node server.js > /tmp/automationstar-api.log 2>&1 &
+          server_pid=$!
+          cleanup() {
+            kill "$server_pid" 2>/dev/null || true
+            wait "$server_pid" 2>/dev/null || true
+          }
+          trap cleanup EXIT
+
+          ready=false
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:3000/openapi.yaml >/dev/null; then
+              ready=true
+              break
+            fi
+            if ! kill -0 "$server_pid" 2>/dev/null; then
+              cat /tmp/automationstar-api.log
+              exit 1
+            fi
+            sleep 2
+          done
+
+          if [[ "$ready" != true ]]; then
+            cat /tmp/automationstar-api.log
+            echo "API did not become ready within 60 seconds."
+            exit 1
+          fi
+
+          API_BASE_URL=http://127.0.0.1:3000 npm test
+
+      - name: Upload Mochawesome report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: checkout-api-mochawesome-report
+          path: reports/mochawesome/
+          if-no-files-found: warn
+          retention-days: 7
