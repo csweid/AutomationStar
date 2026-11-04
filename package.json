@@ -4,7 +4,8 @@
   "description": "In-memory e-commerce checkout REST API built with Express",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "mocha \"test/**/*.test.js\" --reporter mochawesome --reporter-options reportDir=reports/mochawesome,reportFilename=checkout-ep-report,overwrite=true,html=true,json=true"
   },
   "engines": {
     "node": ">=18"
@@ -13,5 +14,12 @@
     "express": "^4.21.2",
     "swagger-ui-express": "^5.0.1",
     "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "chai": "^4.5.0",
+    "dotenv": "^18.0.9",
+    "mocha": "^10.8.2",
+    "mochawesome": "^8.1.1",
+    "supertest": "^7.3.1"
   }
 }

@@ -190,6 +190,10 @@ app.get('/openapi.yaml', (req, res) => {
   return res.type('application/yaml').sendFile(openApiPath);
 });
 
+app.get('/reports/discount-ep-report.html', (req, res) => {
+  return res.sendFile(path.join(__dirname, 'reports', 'discount-ep-report.html'));
+});
+
 app.get('/', (req, res) => {
   return res.redirect('/docs');
 });
@@ -207,6 +211,10 @@ app.use((err, req, res, next) => {
   return res.status(500).json({ error: 'Internal server error.' });
 });
 
-app.listen(port, () => {
-  console.log(`Checkout API listening at http://localhost:${port}`);
-});
+if (require.main === module) {
+  app.listen(port, () => {
+    console.log(`Checkout API listening at http://localhost:${port}`);
+  });
+}
+
+module.exports = app;

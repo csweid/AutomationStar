@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout Discount EP Test Report</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #202b30;
+      --muted: #52636a;
+      --line: #cbd6d8;
+      --paper: #fff;
+      --canvas: #edf2f0;
+      --green: #17684d;
+      --green-bg: #e4f4ec;
+      --red: #923d35;
+      --red-bg: #fbebe8;
+      --accent: #d7ecdf;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--canvas);
+      color: var(--ink);
+      font: 16px/1.5 system-ui, sans-serif;
+    }
+    main { max-width: 1000px; margin: 0 auto; padding: 32px 20px 56px; }
+    header { border-top: 8px solid var(--green); padding: 20px 0 16px; }
+    h1 { margin: 0 0 8px; font-size: 30px; line-height: 1.2; }
+    h2 { margin: 28px 0 12px; font-size: 21px; }
+    h3 { margin: 0 0 12px; font-size: 17px; }
+    p { margin: 8px 0; }
+    .meta { color: var(--muted); }
+    .summary { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+    .summary span { padding: 7px 12px; border: 1px solid var(--line); background: var(--paper); }
+    .pass { color: var(--green); font-weight: 700; }
+    .expected-failure { color: var(--red); font-weight: 700; }
+    table { width: 100%; border-collapse: collapse; background: var(--paper); }
+    th, td { padding: 10px 12px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { background: var(--accent); }
+    .case { margin: 14px 0; padding: 18px; border: 1px solid var(--line); background: var(--paper); }
+    .case header { display: flex; justify-content: space-between; gap: 12px; border: 0; padding: 0 0 10px; }
+    pre { overflow-wrap: anywhere; white-space: pre-wrap; margin: 6px 0 12px; padding: 12px; background: #f2f5f4; border-left: 3px solid var(--green); }
+    code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+    footer { margin-top: 28px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--muted); }
+    @media (max-width: 600px) {
+      main { padding: 20px 12px 36px; }
+      h1 { font-size: 25px; }
+      table { font-size: 14px; }
+      th, td { padding: 8px; }
+      .case { padding: 13px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Checkout Discount: Equivalence Partitioning Report</h1>
+      <p class="meta">Executed: 2026-11-04 10:30:36 UTC · API: <code>http://127.0.0.1:3000</code> · Test account: <code>avery@example.com</code></p>
+      <div class="summary" aria-label="Execution summary">
+        <span><strong>3</strong> partitions exercised</span>
+        <span class="pass">2 successful checkouts</span>
+        <span class="expected-failure">1 expected API rejection</span>
+        <span class="pass">3/3 expected outcomes observed</span>
+      </div>
+    </header>
+
+    <section aria-labelledby="rule-heading">
+      <h2 id="rule-heading">Rule and test design</h2>
+      <p>Per the README and OpenAPI checkout contract, cash receives a 10% discount, credit card receives no discount, and unsupported payment methods are rejected. Equivalence partitioning was used as the sole test design technique.</p>
+      <p>Each accepted payment method is its own partition because it produces a different discount result. Unsupported payment-method strings form the rejection partition. A representative was selected for each partition; the unsupported string and seeded product for each case were selected randomly. The allowed payment partitions each contain one value.</p>
+      <table>
+        <thead>
+          <tr><th>Partition</th><th>Representative</th><th>Expected behavior</th><th>Result</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>P1: cash</td><td><code>cash</code></td><td>HTTP 201; 10% discount, rounded to cents</td><td class="pass">PASS</td></tr>
+          <tr><td>P2: credit card</td><td><code>credit_card</code></td><td>HTTP 201; discount is $0.00</td><td class="pass">PASS</td></tr>
+          <tr><td>P3: unsupported method</td><td><code>bitcoin</code> (random pick)</td><td>HTTP 400; explanatory validation error</td><td class="pass">PASS: expected rejection</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section aria-labelledby="evidence-heading">
+      <h2 id="evidence-heading">Execution evidence</h2>
+      <p>Seeded-user login succeeded with HTTP 200. An item was added to the cart before each checkout; each add-to-cart request returned HTTP 200. The bearer token is intentionally omitted from this report.</p>
+
+      <article class="case">
+        <header>
+          <h3>P1: Cash payment</h3>
+          <span class="pass">PASS</span>
+        </header>
+        <p>Randomly selected item: Insulated Bottle (<code>prod-002</code>), $18.99. Expected cash discount: round($18.99 × 10%) = $1.90.</p>
+        <p><strong>Request</strong></p>
+        <pre><code>POST /api/cart
+{"productId":"prod-002","quantity":1}
+
+POST /api/checkout
+{"paymentMethod":"cash"}</code></pre>
+        <p><strong>Observed response</strong></p>
+        <pre><code>HTTP 201
+{
+  "orderId": "5cb4affb-e435-47b6-becb-3e4b03408f1a",
+  "paymentMethod": "cash",
+  "subtotal": 18.99,
+  "discount": 1.9,
+  "total": 17.09,
+  "currency": "USD"
+}</code></pre>
+        <p>Expected: subtotal $18.99, discount $1.90, total $17.09. Observed values match.</p>
+      </article>
+
+      <article class="case">
+        <header>
+          <h3>P2: Credit card payment</h3>
+          <span class="pass">PASS</span>
+        </header>
+        <p>Randomly selected item: Travel Organizer (<code>prod-003</code>), $24.99.</p>
+        <p><strong>Request</strong></p>
+        <pre><code>POST /api/cart
+{"productId":"prod-003","quantity":1}
+
+POST /api/checkout
+{"paymentMethod":"credit_card"}</code></pre>
+        <p><strong>Observed response</strong></p>
+        <pre><code>HTTP 201
+{
+  "orderId": "4f8c0a25-ee78-4dda-aba9-65e64154b50a",
+  "paymentMethod": "credit_card",
+  "subtotal": 24.99,
+  "discount": 0,
+  "total": 24.99,
+  "currency": "USD"
+}</code></pre>
+        <p>Expected: subtotal $24.99, discount $0.00, total $24.99. Observed values match.</p>
+      </article>
+
+      <article class="case">
+        <header>
+          <h3>P3: Unsupported payment method</h3>
+          <span class="pass">PASS: expected rejection</span>
+        </header>
+        <p>Randomly selected unsupported value: <code>bitcoin</code>. Randomly selected item: Travel Organizer (<code>prod-003</code>), $24.99; the cart was populated before the request.</p>
+        <p><strong>Request</strong></p>
+        <pre><code>POST /api/cart
+{"productId":"prod-003","quantity":1}
+
+POST /api/checkout
+{"paymentMethod":"bitcoin"}</code></pre>
+        <p><strong>Observed failure evidence</strong></p>
+        <pre><code>HTTP 400
+{"error":"paymentMethod must be cash or credit_card."}
+
+GET /api/cart after rejection: HTTP 200
+Cart still contains 1 item.</code></pre>
+        <p>The API rejected the unsupported value as expected and retained the cart item. This is a successful test outcome for the invalid-input partition.</p>
+      </article>
+    </section>
+
+    <footer>
+      <p>All requests were executed against the running Express API using the documented seeded data. This report records a manual execution; no test automation was added.</p>
+    </footer>
+  </main>
+</body>
+</html>
